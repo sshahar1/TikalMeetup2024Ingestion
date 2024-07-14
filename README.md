@@ -1,19 +1,11 @@
-To fetch data:
-```python
-import requests
+# Ingestion project
+This project includes 2 scripts:
+1. [fetch_data.py](fetch_data.py) to query data from PredictHQ - Will output a file called Output.json
+2. [process_file.py](process_file.py) to prepare embeddings for the data - Will output a file called for_collection.json
 
-response = requests.get(
-    url="https://api.predicthq.com/v1/events",
-    headers={
-        "Authorization": "Bearer access_token",
-        "Accept": "text/csv"
-    },
-    params={
-        "category": "concerts,festivals,performing-arts,sports",
-        "country": "US",
-        "label": "art,community,concert,entertainment,family,festival,holiday-hebrew,music"
-    }
-)
-
-print(response.json())
+To import the data to a Couchbase collection:
+1. Install cbimoprt
+2. Run cbimport:
+```bash
+./cbimport json --cluster couchbases://<yourcluster> --username <your user> --password <your password> --bucket <bucket> --scope-collection-exp "<scope>.<collection>" --dataset for_collection.json --generate-key ‘%id%’ --cacert <path to couchbase certificate> --format lines
 ```
