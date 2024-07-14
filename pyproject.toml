@@ -10,6 +10,8 @@ python = "^3.11"
 requests="^2.32.3"
 python-dotenv= "1.0.1"
 pandas = "2.2.2"
+langchain_openai = "0.1.14"
+langchain = "0.2.7"
 
 
 [build-system]
