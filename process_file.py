@@ -26,8 +26,12 @@ def extract_geo_info(geo):
     if 'formatted_address' in geo['address']:
         formatted_address = geo['address']['formatted_address']
     else:
-        formatted_address = ''
-    text = f"{type_info} {coordinates} {formatted_address}"
+        if geo['address'].get('region') is not None:
+            formatted_address = f"{geo['address']['region']} "
+        else:
+            formatted_address = ''
+        formatted_address = f"{formatted_address}{geo['address']['country_code']}"
+    text = f"{formatted_address}"
     return text
 
 
@@ -42,19 +46,20 @@ def flatten_array(x):
         return ''
 
 
+def created_embeddings(row):
+    text = f"Geo Info: {row['geo_info']}"
+
+    return embeddings_model.embed_query(text)
+
+
 df = read_json("Output.json")
 
-df['title_embeddings'] = df['title'].apply(generate_langgraph_embedding_text)
 df['alternate_titles_flat'] = df['alternate_titles'].apply(flatten_array)
-df['alternate_titles_embeddings'] = df['alternate_titles_flat'].apply(generate_langgraph_embedding_text)
 df['description'] = df['description'].apply(edit_description)
-df['description_embeddings'] = df['description'].apply(generate_langgraph_embedding_text)
 df['geo_info'] = df['geo'].apply(extract_geo_info)
-df['geo_embeddings'] = df['geo_info'].apply(generate_langgraph_embedding_text)
-df['category_embeddings'] = df['category'].apply(generate_langgraph_embedding_text)
 df['labels_flat'] = df['labels'].apply(flatten_array)
-df['labels_embeddings'] = df['labels_flat'].apply(generate_langgraph_embedding_text)
 df['phq_attendance_str'] = df['phq_attendance'].apply(lambda x: f'{x}')
-df['phq_attendance_embeddings'] = df['phq_attendance_str'].apply(generate_langgraph_embedding_text)
+
+df['embeddings'] = df.apply(created_embeddings, axis=1)
 
 df.to_json('for_collection.json', orient='records', lines=True)
